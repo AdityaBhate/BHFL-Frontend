@@ -9,13 +9,19 @@ const App = () => {
 	const [response, setResponse] = useState(null);
 	const [selectedOptions, setSelectedOptions] = useState([]);
 	const [dropdownVisible, setDropdownVisible] = useState(false);
+	const [loading, setLoading] = useState(false);
 
 	const handleJsonInputChange = (e) => {
 		setJsonInput(e.target.value);
 	};
 
 	const handleSubmit = async () => {
+		if (!jsonInput) {
+			toast.error("Please enter a valid JSON input.");
+			return;
+		}
 		try {
+			setLoading(true);
 			const parsedJson = JSON.parse(jsonInput);
 			if (!parsedJson.data || !Array.isArray(parsedJson.data)) {
 				toast.error("Invalid JSON format.");
@@ -28,11 +34,12 @@ const App = () => {
 		} catch (err) {
 			console.log(err.response ? err.response.data : err.message);
 			toast.error(err.response ? err.response.data : "Invalid JSON format.");
+		} finally {
+			setLoading(false);
 		}
 	};
 
 	const handleDropdownChange = (selected) => {
-		// Extracting the values from selected options
 		const values = selected.map((option) => option.value);
 		setSelectedOptions(values);
 	};
@@ -99,6 +106,14 @@ const App = () => {
 						Select options:
 					</label>
 					<Select options={options} onChange={handleDropdownChange} isMulti />
+				</div>
+			)}
+
+			{loading && (
+				<div className='mt-6'>
+					<p className='text-lg text-slate-700 font-semibold'>
+						fetching response...
+					</p>
 				</div>
 			)}
 
